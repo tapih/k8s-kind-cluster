@@ -13,11 +13,11 @@ CLUSTER_NAME:="kind"
 start: setup
 	sed s/@KUBERNETES_VERSION@/$(KUBERNETES_VERSION)/ cluster.yaml > /tmp/cluster.yaml
 	env KUBECONFIG= kind create cluster --config /tmp/cluster.yaml --image kindest/node:v$(KUBERNETES_VERSION) --name=$(CLUSTER_NAME)
-	@export KUBECONFIG=$(shell kind get kubeconfig-path --name=$(CLUSTER_NAME))
-	$(HELM) init
-	kubectl create serviceaccount --namespace kube-system tiller
-	kubectl create clusterrolebinding tiller-cluster-rule --clusterrole=cluster-admin --serviceaccount=kube-system:tiller
-	kubectl patch deploy --namespace kube-system tiller-deploy -p '{"spec":{"template":{"spec":{"serviceAccount":"tiller"}}}}'
+	export KUBECONFIG=$(shell kind get kubeconfig-path --name=$(CLUSTER_NAME)) && \
+		$(HELM) init && \
+		kubectl create serviceaccount --namespace kube-system tiller && \
+		kubectl create clusterrolebinding tiller-cluster-rule --clusterrole=cluster-admin --serviceaccount=kube-system:tiller && \
+		kubectl patch deploy --namespace kube-system tiller-deploy -p '{"spec":{"template":{"spec":{"serviceAccount":"tiller"}}}}'
 
 stop:
 	kind delete cluster --name=$(CLUSTER_NAME) || true

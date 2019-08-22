@@ -112,7 +112,7 @@ spec:
                 fieldRef:
                   apiVersion: v1
                   fieldPath: spec.nodeName
-          image: quay.io/tapih/promtail:v0.2.0.4
+          image: quay.io/tapih/promtail:v0.2.0.5
           imagePullPolicy: IfNotPresent
           name: promtail
           ports:
@@ -202,6 +202,15 @@ data:
     target_config:
       sync_period: 10s
     scrape_configs:
+      - job_name: journal
+        journal:
+          max_age: 12h
+          path: /var/log/journal
+          labels:
+            job: systemd-journal
+        relabel_configs:
+          - source_labels: ['__journal__systemd_unit']
+            target_label: 'unit'
       - job_name: kubernetes-pods-name
         pipeline_stages:
           - docker: {}

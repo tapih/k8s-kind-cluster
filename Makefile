@@ -4,7 +4,7 @@ HELM:=/usr/local/bin/helm
 TILLER:=/usr/local/bin/tiller
 KIND:=$(GOPATH)/bin/kind
 
-KIND_VERSION:=0.4.0
+KIND_VERSION:=0.5.1
 KUBERNETES_VERSION:=1.14.3
 HELM_VERSION:=2.14.3
 

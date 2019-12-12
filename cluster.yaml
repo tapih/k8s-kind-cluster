@@ -10,10 +10,13 @@ kubeadmConfigPatches:
   metadata:
     name: config
   kubernetesVersion: "v@KUBERNETES_VERSION@"
+  apiServer:
+    extraArgs:
+      v: 7
   networking:
     serviceSubnet: 10.0.0.0/16
 nodes:
 - role: control-plane
 - role: worker
 - role: worker
-
+- role: worker

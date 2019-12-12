@@ -1,23 +1,16 @@
 SUDO:=sudo
 KUBECTL:=/usr/local/bin/kubectl
-HELM:=/usr/local/bin/helm
-TILLER:=/usr/local/bin/tiller
 KIND:=$(GOPATH)/bin/kind
-
-KIND_VERSION:=0.4.0
-KUBERNETES_VERSION:=1.14.3
-HELM_VERSION:=2.14.3
-
+KIND_VERSION:=0.6.1
+KUBERNETES_VERSION:=1.16.3
 CLUSTER_NAME:="kind"
 
 start: setup
 	sed s/@KUBERNETES_VERSION@/$(KUBERNETES_VERSION)/ cluster.yaml > /tmp/cluster.yaml
-	env KUBECONFIG= kind create cluster --config /tmp/cluster.yaml --image kindest/node:v$(KUBERNETES_VERSION) --name=$(CLUSTER_NAME)
-	$(HELM) init
-	@export KUBECONFIG=$(shell kind get kubeconfig-path --name=$(CLUSTER_NAME))
-	kubectl create serviceaccount --namespace kube-system tiller
-	kubectl create clusterrolebinding tiller-cluster-rule --clusterrole=cluster-admin --serviceaccount=kube-system:tiller
-	kubectl patch deploy --namespace kube-system tiller-deploy -p '{"spec":{"template":{"spec":{"serviceAccount":"tiller"}}}}'
+	kind create cluster --config /tmp/cluster.yaml --image kindest/node:v$(KUBERNETES_VERSION) --name=$(CLUSTER_NAME)
+
+run: start
+	go run -mod=vendor main.go
 
 stop:
 	kind delete cluster --name=$(CLUSTER_NAME) || true
@@ -44,4 +37,4 @@ $(HELM) $(TILER):
 clean: stop
 	$(SUOD) rm -f $(KUBECTL) $(KIND) $(HELM) $(TILER)
 
-.PHONY: start stop setup clean
+.PHONY: start stop setup clean run

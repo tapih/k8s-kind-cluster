@@ -10,6 +10,7 @@ import (
 	apiv1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/scheme"
@@ -64,16 +65,30 @@ func main() {
 			},
 		},
 	}
+	_ = deployment
 
-	data, err := runtime.Encode(scheme.Codecs.LegacyCodec(appsv1.SchemeGroupVersion), deployment)
-	if err != nil {
-		log.Fatal(err)
+	sa := &apiv1.ServiceAccount{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:        "cke-cluster-dns",
+			// Namespace:   "kube-system",
+			// Annotations: map[string]string{"cke.cybozu.com/revision": "1"},
+		},
 	}
 
-	req := clientset.AppsV1().RESTClient().Patch(types.ApplyPatchType).
-		Namespace("default").
-		Resource("deployments").
-		Name("nginx").
+	// data, err := runtime.Encode(scheme.Codecs.LegacyCodec(appsv1.SchemeGroupVersion), deployment)
+	data, err := runtime.Encode(scheme.Codecs.LegacyCodec(schema.GroupVersion{Group: "", Version: "v1"}), sa)
+	// data, err := json.Marshal(deployment)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	// data := []byte("{\"kind\":\"ServiceAccount\",\"apiVersion\":\"v1\",\"metadata\":{\"name\":\"cke-cluster-dns\",\"namespace\":\"kube-system\",\"creationTimestamp\":null,\"annotations\":{\"cke.cybozu.com/revision\":\"1\"}}}\n")
+	fmt.Println(string(data))
+	// data := []byte("")
+
+	req := clientset.CoreV1().RESTClient().Patch(types.ApplyPatchType).
+        Namespace("kube-system").
+		Resource("serviceaccount").
+		Name("cke-cluster-dns").
 		Param("fieldManager", "try-server-side-apply").
 		Body(data)
 	fmt.Printf("%#v", req)

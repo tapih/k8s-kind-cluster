@@ -3,6 +3,8 @@ KUBECTL:=/usr/local/bin/kubectl
 KIND:=$(GOPATH)/bin/kind
 KIND_VERSION:=0.6.1
 KUBERNETES_VERSION:=1.16.3
+HELM:=/usr/local/bin/helm
+HELM_VERSION:=3.0.2
 CLUSTER_NAME:="kind"
 
 all: start
@@ -18,10 +20,8 @@ $(KUBECTL):
 
 $(HELM):
 	curl -sfL https://get.helm.sh/helm-v$(HELM_VERSION)-linux-amd64.tar.gz -o /tmp/helm.tar.gz
-	cd /tmp; tar xvzf helm.tar.gz && rm -f helm.tar.gz
-	$(SUDO) mv /tmp/linux-amd64/helm $(HELM)
+	$(SUDO) tar xvzf /tmp/helm.tar.gz -C /usr/local/bin --strip-components=1 && rm -f /tmp/helm.tar.gz
 	$(SUDO) chmod 755 $(HELM)
-	$(HELM) repo update
 
 start: setup
 	sed s/@KUBERNETES_VERSION@/$(KUBERNETES_VERSION)/ cluster.yaml > /tmp/cluster.yaml

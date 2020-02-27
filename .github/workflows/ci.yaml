@@ -1,13 +1,19 @@
 name: Greet Everyone
 # This workflow is triggered on pushes to the repository.
-on: [push]
+on:
+  push:
+    branches:
+      - github-actions
+
+env:
+  THIS_IS_GLOBAL_ENV: global
 
 jobs:
   build:
     # Job name is Greeting
     name: Greeting
     # This job runs on Linux
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-16.04
     steps:
       # This step uses GitHub's hello-world-javascript-action: https://github.com/actions/hello-world-javascript-action
       - name: Hello world
@@ -18,3 +24,7 @@ jobs:
       # This step prints an output (time) from the previous step's action.
       - name: Echo the greeting's time
         run: echo 'The time was ${{ steps.hello.outputs.time }}.'
+      - name: Echo global env
+        run: echo ${THIS_IS_GLOBAL_ENV}
+      - name: Echo ubuntu version
+        run: lsb_release -a
